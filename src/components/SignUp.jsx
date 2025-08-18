@@ -1,22 +1,70 @@
 import React, { useState } from "react";
-import "./Auth.css";
+import "./signup.css";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { app, db } from "../../firebase"; 
+import { doc, setDoc } from "firebase/firestore";
+import { toast , ToastContainer} from "react-toastify";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 export default function Signup() {
+  const auth = getAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user; 
+      if (user) {
+        await setDoc(doc(db, "users", user.uid), {
+          name: name,
+          email: email,
+          createdAt: new Date()
+        });
+        toast.success("Account created successfully!", { position: 'top-center' });
+      }
+    } catch (error) {
+      toast.error(`Error: ${error.message}`, { position: 'top-center' });
+    }
     console.log("Name:", name);
     console.log("Email:", email);
     console.log("Password:", password);
     // API call or signup logic goes here
+  };
+
+  // Google OAuth signup
+
+  const handleGoogleSignUp = async (e) => {
+    e.preventDefault();
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      if (user) {
+        await setDoc(doc(db, "users", user.uid), {
+          name: user.displayName,
+          email: user.email,
+          createdAt: new Date()
+        });
+      }
+      if (user) {
+        await setDoc(doc(db, "users", user.uid), {
+          name: user.displayName,
+          email: user.email,
+          createdAt: new Date()
+        });
+        toast.success("Signed up with Google!", { position: 'top-center' });
+      }
+    } catch (error) {
+      toast.error(`Google Sign Up Error: ${error.message}`, { position: 'top-center' });
+    }
   };
 
   return (
@@ -69,8 +117,10 @@ export default function Signup() {
         </div>
 
         <button type="submit" className="auth-btn">Sign Up</button>
+        <p>or</p>
+        <button className="auth-btn google-btn" onClick={handleGoogleSignUp}>Sign Up with Google</button>
         <p className="switch-text">
-          Already have an account? <a href="#">Login</a>
+          Already have an account? <a href="/">Login</a>
         </p>
       </form>
     </div>

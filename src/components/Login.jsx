@@ -1,14 +1,39 @@
 import React, { useState } from "react";
+import "./login.css";
+import { getAuth, signInWithEmailAndPassword} from "firebase/auth";
+import { app, auth } from "../../firebase";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Email:", email);
     console.log("Password:", password);
     // Here you can add API call or authentication logic
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      console.log("User signed in successfully");
+    } catch (error) {
+      console.error("Error signing in:", error);
+    }
+  };
+
+  async function handleGoogleSignIn(e) {
+    e.preventDefault();
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      if (user) {
+        console.log("User signed in with Google:", user);
+      }
+    } catch (error) {
+      console.error("Error signing in with Google:", error);
+    }
   };
 
   return (
@@ -116,7 +141,8 @@ export default function Login() {
         >
           Login
         </button>
-        
+        <p>or</p>
+        <button className="auth-btn google-btn" onClick={handleGoogleSignIn}>Sign In with Google</button>
         <p style={{
           marginTop: '1rem',
           fontSize: '14px',
