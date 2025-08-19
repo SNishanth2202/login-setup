@@ -1,24 +1,33 @@
 import React, { useState } from "react";
 import "./login.css";
-import { getAuth, signInWithEmailAndPassword} from "firebase/auth";
-import { app, auth } from "../../firebase";
+import { signInWithEmailAndPassword} from "firebase/auth";
+import { auth } from "../../firebase";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+import Loader from "./Loader.jsx"; 
 
 
 export default function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     console.log("Email:", email);
     console.log("Password:", password);
     // Here you can add API call or authentication logic
     try {
       await signInWithEmailAndPassword(auth, email, password);
       console.log("User signed in successfully");
+      navigate("/");
     } catch (error) {
       console.error("Error signing in:", error);
+    }
+    finally {
+      setLoading(false); // 4. Stop loader in any case
     }
   };
 
@@ -30,6 +39,7 @@ export default function Login() {
       const user = result.user;
       if (user) {
         console.log("User signed in with Google:", user);
+        navigate("/");
       }
     } catch (error) {
       console.error("Error signing in with Google:", error);
@@ -47,7 +57,8 @@ export default function Login() {
       width: '100%',
       background: 'linear-gradient(135deg, #bcbcbd 0%, #536e9fff 50%, #045199ff 100%)'
     }}>
-      <div 
+      <div>{loading && <Loader />}</div>
+      <div
         style={{
           background: '#fff',
           padding: '2rem',

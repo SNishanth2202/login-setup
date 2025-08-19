@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./signup.css";
+import { useNavigate } from 'react-router-dom'; 
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { app, db } from "../../firebase"; 
 import { doc, setDoc } from "firebase/firestore";
@@ -7,6 +8,7 @@ import { toast , ToastContainer} from "react-toastify";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 export default function Signup() {
+  const navigate = useNavigate(); 
   const auth = getAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -29,6 +31,7 @@ export default function Signup() {
           createdAt: new Date()
         });
         toast.success("Account created successfully!", { position: 'top-center' });
+        navigate("/");
       }
     } catch (error) {
       toast.error(`Error: ${error.message}`, { position: 'top-center' });
@@ -61,6 +64,7 @@ export default function Signup() {
           createdAt: new Date()
         });
         toast.success("Signed up with Google!", { position: 'top-center' });
+        navigate("/");
       }
     } catch (error) {
       toast.error(`Google Sign Up Error: ${error.message}`, { position: 'top-center' });
